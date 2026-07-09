@@ -1,0 +1,545 @@
+/* ==========================
+   RESET
+========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background: #DCCEF8;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+/* ==========================
+   BACKGROUND
+========================== */
+
+.background{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    z-index:-1;
+    background:linear-gradient(135deg,#D0BDF4
+#DCCEF8);
+}
+
+.background-circle{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(80px);
+    opacity:.45;
+}
+
+.background-circle.one{
+    width:350px;
+    height:350px;
+    background:#caa8ff;
+    top:-100px;
+    left:-80px;
+}
+
+.background-circle.two{
+    width:400px;
+    height:400px;
+    background:#e3d2ff;
+    bottom:-120px;
+    right:-120px;
+}
+
+/* ==========================
+   LOGIN CONTAINER
+========================== */
+
+.login-container{
+    width:100%;
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:40px 20px;
+}
+
+/* ==========================
+   LOGIN CARD
+========================== */
+
+.login-card{
+
+    width:100%;
+    max-width:470px;
+
+    background:#fff;
+
+    border-radius:28px;
+
+    padding:45px;
+
+    box-shadow:
+        0 20px 50px rgba(110,70,255,.15);
+
+    animation:fadeUp .7s ease;
+
+}
+
+/* ==========================
+   LOGO
+========================== */
+
+.logo{
+    display:flex;
+    justify-content:center;
+}
+
+.logo img{
+    width:150px;
+}
+
+/* ==========================
+   DIVIDER
+========================== */
+
+.divider{
+    width:65px;
+    height:4px;
+    background:#7c3aed;
+    margin:22px auto 30px;
+    border-radius:50px;
+}
+
+/* ==========================
+   HEADING
+========================== */
+
+.heading{
+    text-align:center;
+}
+
+.icon{
+    width:65px;
+    height:65px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    background:#f3edff;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    color:#7c3aed;
+
+    font-size:28px;
+
+    margin-bottom:15px;
+}
+
+.heading h2{
+
+    font-size:32px;
+
+    color:#222;
+
+    margin-bottom:10px;
+
+}
+
+.heading p{
+
+    color:#777;
+
+    margin-bottom:35px;
+
+}
+
+/* ==========================
+   FORM
+========================== */
+
+.form-group{
+
+    margin-bottom:22px;
+
+}
+
+label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+    color:#444;
+
+}
+
+.input-box{
+
+    display:flex;
+
+    align-items:center;
+
+    border:1px solid #ddd;
+
+    border-radius:16px;
+
+    padding:15px 18px;
+
+    transition:.3s;
+
+}
+
+.input-box:hover{
+
+    border-color:#7c3aed;
+
+}
+
+.input-box:focus-within{
+
+    border-color:#7c3aed;
+
+    box-shadow:0 0 10px rgba(124,58,237,.15);
+
+}
+
+.input-box i{
+
+    color:#999;
+
+}
+
+.input-box input{
+
+    flex:1;
+
+    border:none;
+
+    outline:none;
+
+    margin-left:12px;
+
+    font-size:15px;
+
+    background:none;
+
+}
+
+.eye{
+
+    cursor:pointer;
+
+}
+
+/* ==========================
+   FORGOT
+========================== */
+
+.forgot{
+
+    text-align:right;
+
+    margin-top:-8px;
+
+    margin-bottom:25px;
+
+}
+
+.forgot a{
+
+    text-decoration:none;
+
+    color:#7c3aed;
+
+    font-size:14px;
+
+}
+
+.forgot a:hover{
+
+    text-decoration:underline;
+
+}
+
+/* ==========================
+   BUTTON
+========================== */
+
+.login-btn{
+
+    width:100%;
+
+    border:none;
+
+    border-radius:16px;
+
+    padding:16px;
+
+    background:linear-gradient(90deg,#7c3aed,#9b5cff);
+
+    color:#fff;
+
+    font-size:17px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.login-btn i{
+
+    margin-right:8px;
+
+}
+
+.login-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 15px 30px rgba(124,58,237,.30);
+
+}
+
+/* ==========================
+   FOOTER
+========================== */
+
+.footer{
+
+    margin-top:30px;
+
+    text-align:center;
+
+}
+
+.footer p{
+
+    color:#888;
+
+    font-size:13px;
+
+}
+
+.footer span{
+
+    display:block;
+
+    margin-top:10px;
+
+    color:#8b5cf6;
+
+    font-weight:600;
+
+    letter-spacing:2px;
+
+    font-size:13px;
+
+}
+
+/* ==========================
+   ANIMATION
+========================== */
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+        transform:translateY(30px);
+
+    }
+
+    to{
+
+        opacity:1;
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ==========================
+   TABLET
+========================== */
+
+@media(max-width:768px){
+
+.login-card{
+
+    padding:35px 25px;
+
+    border-radius:22px;
+
+}
+
+.heading h2{
+
+    font-size:28px;
+
+}
+
+.logo img{
+
+    width:130px;
+
+}
+
+}
+
+/* ==========================
+   MOBILE
+========================== */
+
+@media(max-width:480px){
+
+.login-container{
+
+    padding:20px 15px;
+
+}
+
+.login-card{
+
+    padding:28px 20px;
+
+}
+
+.heading h2{
+
+    font-size:24px;
+
+}
+
+.input-box{
+
+    padding:13px;
+
+}
+
+.login-btn{
+
+    padding:15px;
+
+}
+
+.footer p{
+
+    font-size:12px;
+
+}
+
+}
+/* ==========================
+   FLASH MESSAGE
+========================== */
+
+.flash-message{
+
+    position:fixed;
+
+    top:30px;
+
+    right:30px;
+
+    background:#22c55e;
+
+    color:white;
+
+    padding:16px 24px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:16px;
+
+    font-weight:500;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+    transform:translateX(400px);
+
+    transition:.4s ease;
+
+    z-index:9999;
+
+}
+
+.flash-message.show{
+
+    transform:translateX(0);
+
+}
+
+.flash-message i{
+
+    font-size:20px;
+
+}
+
+@media(max-width:480px){
+
+.flash-message{
+
+    left:15px;
+
+    right:15px;
+
+    top:20px;
+
+    transform:translateY(-120px);
+
+}
+
+.flash-message.show{
+
+    transform:translateY(0);
+
+}
+
+}
+/* Add these rules at the bottom of your existing style.css */
+
+.hide {
+    display: none !important;
+}
+
+#backToLoginLink {
+    font-size: 0.9rem;
+    color: var(--primary-color, #4f46e5); /* Falls back to classic blue if variable isn't set */
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#backToLoginLink:hover {
+    text-decoration: underline;
+}
+
+/* Dynamic styling classes for Flash Messages */
+.flash-message.success {
+    background-color: #10b981;
+    color: white;
+}
+
+.flash-message.error {
+    background-color: #ef4444;
+    color: white;
+}
