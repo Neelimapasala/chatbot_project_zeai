@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>ZeAI Soft — Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  
+:root{
+  --bg:#D0BDF4;
+  --bg-alt:#DCCEF8;
+  --panel:#FFFFFF;
+  --panel-solid:#F6F0FE;
+  --border:rgba(91,33,182,0.16);
+  --border-strong:rgba(91,33,182,0.4);
+  --purple:#8B5CF6;
+  --purple-light:#7C3AED;
+  --purple-dark:#5B21B6;
+  --text:#241B3D;
+  --text-muted:#6B6480;
+}
+*{font-family:sans-serif !important;}
+body{background:var(--bg)!important;color:var(--text);}
+
+  * { font-family:sans-serif; }
+
+  /* ── animated background blobs ─────────────────────────── */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.30;
+    pointer-events: none;
+    z-index: 0;
+    animation: blobFloat 20s ease-in-out infinite;
+  }
+  .blob-1 { width: 500px; height: 500px; background: #a78bfa; top: 60px; right: 60px; animation-duration: 24s; }
+  .blob-2 { width: 450px; height: 450px; background: #7c3aed; bottom: 40px; left: 60px; animation-duration: 18s; animation-delay: -6s; }
+  @keyframes blobFloat {
+    0%   { transform: translate(0,0) scale(1); }
+    25%  { transform: translate(40px,60px) scale(1.1); }
+    50%  { transform: translate(-30px,30px) scale(0.95); }
+    75%  { transform: translate(30px,-40px) scale(1.05); }
+    100% { transform: translate(0,0) scale(1); }
+  }
+
+  /* ── card hover lift ───────────────────────────────────── */
+  .hover-card {
+    transition: transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .hover-card:hover {
+    transform: translateY(-5px) scale(1.015);
+    border-color: var(--border-strong) !important;
+    box-shadow: 0 12px 32px rgba(124,58,237,0.18) !important;
+  }
+  .hover-row { transition: background-color 0.15s ease, transform 0.15s ease; }
+  .hover-row:hover { background-color: #F6F0FE; transform: translateX(3px); }
+  .hover-row-q:hover { background-color: #f5f0ff; transform: translateX(4px) scale(1.01); }
+
+  .status-card { transition: all 0.25s ease; }
+  .status-card:hover { border-color: var(--border-strong); background-color: #F6F0FE; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(124,58,237,0.12); }
+
+  /* ── nav underline ─────────────────────────────────────── */
+  .nav-link { position: relative; }
+  .nav-underline {
+    position: absolute; bottom: 0; left: 14px; right: 14px; height: 2px;
+    background: #7C3AED; border-radius: 999px;
+  }
+
+  /* ── page fade-in ──────────────────────────────────────── */
+  .page-enter { animation: pageIn 0.32s cubic-bezier(.4,0,.2,1); }
+  @keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+  .pulse-dot { animation: pulseDot 1.6s ease-in-out infinite; }
+  @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+</style>
+</head>
+<body >
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+/* ── Minimal inline icon set (replaces lucide-react) ─────── */
+const Icon = ({ children, className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+       strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {children}
+  </svg>
+);
+const ChatIcon   = (p) => <Icon {...p}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></Icon>;
+const HelpIcon    = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></Icon>;
+const DocIcon     = (p) => <Icon {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></Icon>;
+const UsersIcon   = (p) => <Icon {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></Icon>;
+const TrendIcon   = (p) => <Icon {...p}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></Icon>;
+const EyeIcon     = (p) => <Icon {...p}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></Icon>;
+const ClockIcon   = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Icon>;
+const HashIcon    = (p) => <Icon {...p}><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></Icon>;
+const ChevronIcon = (p) => <Icon {...p}><polyline points="6 9 12 15 18 9"/></Icon>;
+const WifiIcon    = (p) => <Icon {...p}><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></Icon>;
+const DbIcon      = (p) => <Icon {...p}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></Icon>;
+const CpuIcon     = (p) => <Icon {...p}><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/><line x1="20" y1="15" x2="23" y2="15"/></Icon>;
+const LayersIcon  = (p) => <Icon {...p}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></Icon>;
+const BellIcon    = (p) => <Icon {...p}><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></Icon>;
+const LogoutIcon  = (p) => <Icon {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Icon>;
+
+/* ── Card wrapper ──────────────────────────────────────────── */
+function Card({ children, className = "" }) {
+  return (
+    <div className={`hover-card bg-white rounded-2xl border-2 border-[rgba(91,33,182,0.16)] shadow-[0_2px_12px_rgba(124,58,237,0.08)] ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/* ── Data ──────────────────────────────────────────────────── */
+const statsCards = [
+  { label: "Total Queries",   value: "12,845", Icon: ChatIcon, trend: "+12%",  iconBg: "bg-blue-100",    iconColor: "text-blue-500"    },
+  { label: "Total FAQs",      value: "532",    Icon: HelpIcon, trend: "+6%",   iconBg: "bg-emerald-100", iconColor: "text-emerald-600" },
+  { label: "Total Documents", value: "128",    Icon: DocIcon,  trend: "+6%",   iconBg: "bg-orange-100",  iconColor: "text-orange-500"  },
+  { label: "Active Users",    value: "1,256",  Icon: UsersIcon,trend: "+2.7%", iconBg: "bg-violet-100",  iconColor: "text-violet-600"  },
+];
+
+const weeklyData = {
+  "This Week": [ {d:"Mon",v:980},{d:"Tue",v:1420},{d:"Wed",v:1100},{d:"Thu",v:1750},{d:"Fri",v:1380},{d:"Sat",v:640},{d:"Sun",v:520} ],
+  "Last Week": [ {d:"Mon",v:820},{d:"Tue",v:1150},{d:"Wed",v:970},{d:"Thu",v:1490},{d:"Fri",v:1220},{d:"Sat",v:540},{d:"Sun",v:430} ],
+};
+
+const recentChats = [
+  { initials: "DN", name: "Damian Nymo",   message: "What is the duration of the internship?",  time: "12:41 AM", color: "bg-violet-500"  },
+  { initials: "PF", name: "Priva Faulkner", message: "What are the working program positions?",  time: "12:44 AM", color: "bg-indigo-500"  },
+  { initials: "JK", name: "Jamie Kim",      message: "Is there any age/grade requirement?",       time: "12:41 AM", color: "bg-purple-500"  },
+  { initials: "NA", name: "Nguyen Ali",     message: "What are the available programs?",          time: "12:44 AM", color: "bg-fuchsia-500" },
+];
+
+const faqCategories = [
+  { name: "Internship",       value: 40, color: "#7C3AED" },
+  { name: "Training Program", value: 28, color: "#a78bfa" },
+  { name: "Hackathon",        value: 18, color: "#c4b5fd" },
+  { name: "Eligibility",      value: 9,  color: "#ddd6fe" },
+  { name: "Others",           value: 5,  color: "rgba(91,33,182,0.16)" },
+];
+
+const topFAQs = [
+  { question: "What is the duration of the internship?", count: 423 },
+  { question: "Tell me about the training program",       count: 314 },
+  { question: "How can I participate in hackathon?",      count: 291 },
+  { question: "What are the eligibility criteria?",       count: 205 },
+  { question: "What is the selection process?",           count: 195 },
+];
+
+const systemStatuses = [
+  { label: "API Status",           Icon: WifiIcon,   status: "Healthy",     iconBg: "bg-orange-100",  iconColor: "text-orange-500"  },
+  { label: "Database",             Icon: DbIcon,     status: "Connected",   iconBg: "bg-blue-100",    iconColor: "text-blue-500"    },
+  { label: "AI Model (Groq)",      Icon: CpuIcon,    status: "Operational", iconBg: "bg-violet-100",  iconColor: "text-violet-600"  },
+  { label: "Vector DB (ChromaDB)", Icon: LayersIcon, status: "Active",      iconBg: "bg-emerald-100", iconColor: "text-emerald-600" },
+];
+
+/* ── Manual SVG Area Chart (no chart library) ─────────────── */
+function AreaChart({ data }) {
+  const w = 560, h = 185, padL = 34, padB = 22, padT = 10;
+  const max = 1800;
+  const stepX = (w - padL - 10) / (data.length - 1);
+  const yFor = (v) => padT + (h - padT - padB) * (1 - v / max);
+  const points = data.map((p, i) => [padL + i * stepX, yFor(p.v)]);
+  const linePath = points.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(" ");
+  const areaPath = `${linePath} L${points[points.length - 1][0]},${h - padB} L${points[0][0]},${h - padB} Z`;
+  const yTicks = [0, 450, 900, 1350, 1800];
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-auto">
+      <defs>
+        <linearGradient id="qGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="5%"  stopColor="#7C3AED" stopOpacity="0.18" />
+          <stop offset="95%" stopColor="#7C3AED" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {yTicks.map((t) => (
+        <g key={t}>
+          <line x1={padL} y1={yFor(t)} x2={w-6} y2={yFor(t)} stroke="#f0eef8" strokeDasharray="3 3" />
+          <text x={padL - 8} y={yFor(t) + 3} fontSize="9" fill="#6b6880" textAnchor="end">{t}</text>
+        </g>
+      ))}
+      {data.map((p, i) => (
+        <text key={p.d} x={padL + i * stepX} y={h - 6} fontSize="9" fill="#6b6880" textAnchor="middle">{p.d}</text>
+      ))}
+      <path d={areaPath} fill="url(#qGrad)" />
+      <path d={linePath} fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      {points.map((p, i) => (
+        <circle key={i} cx={p[0]} cy={p[1]} r="3.5" fill="#7C3AED" stroke="#fff" strokeWidth="2" />
+      ))}
+    </svg>
+  );
+}
+
+/* ── Manual SVG Donut Chart ────────────────────────────────── */
+function DonutChart({ data }) {
+  const cx = 75, cy = 65, r = 52, stroke = 20;
+  const circumference = 2 * Math.PI * r;
+  let offset = 0;
+  return (
+    <svg width="160" height="140" viewBox="0 0 150 140">
+      {data.map((d, i) => {
+        const dash = (d.value / 100) * circumference;
+        const seg = (
+          <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={d.color} strokeWidth={stroke}
+            strokeDasharray={`${dash} ${circumference - dash}`} strokeDashoffset={-offset}
+            transform={`rotate(-90 ${cx} ${cy})`} />
+        );
+        offset += dash;
+        return seg;
+      })}
+    </svg>
+  );
+}
+
+/* ── Hero illustration (laptop + charts) ──────────────────── */
+function HeroIllustration() {
+  return (
+    <svg viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <circle cx="290" cy="40"  r="55" fill="#ddd6fe" opacity="0.45" />
+      <circle cx="310" cy="160" r="30" fill="#c4b5fd" opacity="0.3"  />
+      <circle cx="60"  cy="160" r="22" fill="#ddd6fe" opacity="0.4"  />
+      <rect x="80" y="18" width="210" height="148" rx="10" fill="#7C3AED" />
+      <rect x="86" y="24" width="198" height="136" rx="7"  fill="#5b21b6" />
+      <rect x="90" y="28" width="190" height="128" rx="5"  fill="white"   />
+      <polyline points="105,118 115,100 125,108 135,88 145,95 155,78 165,84 175,72" stroke="#7C3AED" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="230" cy="90" r="34" fill="none" stroke="rgba(91,33,182,0.16)" strokeWidth="14" />
+      <circle cx="230" cy="90" r="34" fill="none" stroke="#7C3AED" strokeWidth="14" strokeDasharray="85 129" />
+      <circle cx="230" cy="90" r="34" fill="none" stroke="#a78bfa" strokeWidth="14" strokeDasharray="38 176" strokeDashoffset="-85" />
+      <text x="230" y="87" fontSize="11" fontWeight="700" fill="#241B3D" textAnchor="middle">68%</text>
+      <text x="230" y="98" fontSize="6"  fill="#6b6880"  textAnchor="middle">FAQs</text>
+      <rect x="44"  y="162" width="28"  height="18" rx="4" fill="#7C3AED" opacity="0.7" />
+      <line x1="58" y1="158" x2="58" y2="135" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
+      <ellipse cx="50" cy="142" rx="10" ry="6" fill="#8b5cf6" opacity="0.7" transform="rotate(-30 50 142)" />
+      <ellipse cx="67" cy="138" rx="10" ry="6" fill="#7C3AED" opacity="0.7" transform="rotate(25 67 138)"  />
+    </svg>
+  );
+}
+
+/* ── Nav ───────────────────────────────────────────────────── */
+const navItems = ["Dashboard", "FAQ Management", "Knowledge Base", "Analytics", "Chat History", "Settings"];
+
+function Nav() {
+  const [active] = useState("Dashboard");
+  return (
+    <header className="relative z-50 bg-white/80 backdrop-blur-md border-b border-[rgba(91,33,182,0.16)] sticky top-0">
+      <div className="max-w-[1400px] mx-auto px-8 h-14 flex items-center gap-6">
+        <div className="flex-shrink-0 font-extrabold text-xl">
+          <span style={{color:"#7C3AED"}}>Ze</span><span style={{color:"#241B3D"}}>AI</span>
+          <span className="ml-1 text-[10px] font-semibold text-[#a78bfa] align-top">Soft</span>
+        </div>
+        <nav className="flex-1 flex items-center justify-center gap-1">
+          {navItems.map((label) => {
+            const isActive = active === label;
+            return (
+              <button key={label} className={`nav-link px-3.5 py-2.5 text-sm font-medium transition-colors ${isActive ? "text-[#7C3AED]" : "text-[#6b6880] hover:text-[#241B3D]"}`}>
+                {label}
+                {isActive && <span className="nav-underline"></span>}
+              </button>
+            );
+          })}
+        </nav>
+        <div className="flex items-center gap-3 min-w-[160px] justify-end">
+          <button className="relative w-8 h-8 rounded-lg border border-[rgba(91,33,182,0.16)] flex items-center justify-center text-[#6b6880] hover:">
+            <BellIcon className="w-4 h-4" />
+            <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#7C3AED] rounded-full"></span>
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold">A</div>
+            <div>
+              <p className="text-xs font-semibold text-[#241B3D] leading-none">Admin</p>
+              <p className="text-[9px] text-[#6b6880]">Super Admin</p>
+            </div>
+            <ChevronIcon className="w-3 h-3 text-[#6b6880]" />
+          </div>
+          <button className="flex items-center gap-1 text-xs text-[#6b6880] hover:text-red-500 transition-colors px-2 py-1.5 rounded-lg hover:bg-red-50">
+            <LogoutIcon className="w-3.5 h-3.5" /> Logout
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* ── Dashboard page ────────────────────────────────────────── */
+function Dashboard() {
+  const [weekFilter, setWeekFilter] = useState("This Week");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const chartData = weeklyData[weekFilter];
+
+  return (
+    <div className="min-h-screen  flex flex-col relative overflow-x-hidden">
+      <div className="blob blob-1"></div>
+      <div className="blob blob-2"></div>
+      <Nav />
+
+      <div className="flex-1 relative z-10">
+        <div className="page-enter max-w-[1400px] mx-auto px-8 pb-16">
+
+          {/* Hero */}
+          <section className="mt-6 mb-6 rounded-2xl overflow-hidden flex items-center justify-between"
+            style={{ background: "linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #b197fc 100%)", minHeight: 160 }}>
+            <div className="px-10 py-8 flex-1">
+              <h1 className="text-[26px] font-bold text-[#1e0a4a] mb-1.5 leading-snug">Welcome back, Admin! 👋</h1>
+              <p className="text-[#3b1f7a] text-sm leading-relaxed font-medium">
+                Here's what's happening with your<br/>AI Customer Support Chatbot today.
+              </p>
+            </div>
+            <div className="flex-shrink-0 w-[360px] h-[180px] pr-4">
+              <HeroIllustration />
+            </div>
+          </section>
+
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-5 mb-6">
+            {statsCards.map(({ label, value, Icon: I, trend, iconBg, iconColor }) => (
+              <Card key={label} className="p-5">
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center`}>
+                    <I className={`w-5 h-5 ${iconColor}`} />
+                  </div>
+                  <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    <TrendIcon className="w-3 h-3" />{trend}
+                  </span>
+                </div>
+                <p className="text-2xl font-bold text-[#241B3D]">{value}</p>
+                <p className="text-sm font-medium text-[#241B3D] mt-0.5">{label}</p>
+                <p className="text-[11px] text-[#6b6880]">vs last week</p>
+              </Card>
+            ))}
+          </div>
+
+          {/* Main row */}
+          <div className="grid grid-cols-[1.8fr_1.2fr_1fr] gap-5 mb-5">
+            <Card>
+              <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#f0edf9]">
+                <h2 className="font-semibold text-sm text-[#241B3D]">Queries Overview</h2>
+                <div className="relative">
+                  <button onClick={() => setFilterOpen(!filterOpen)}
+                    className="flex items-center gap-1 text-xs font-medium text-[#6b6880] border border-[rgba(91,33,182,0.16)] rounded-lg px-2.5 py-1.5 hover:">
+                    {weekFilter}<ChevronIcon className="w-3 h-3" />
+                  </button>
+                  {filterOpen && (
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-[rgba(91,33,182,0.16)] rounded-xl shadow-lg py-1 z-20 w-32">
+                      {Object.keys(weeklyData).map((k) => (
+                        <button key={k} onClick={() => { setWeekFilter(k); setFilterOpen(false); }}
+                          className={`w-full text-left px-3 py-2 text-xs ${weekFilter===k ? "text-[#7C3AED] font-semibold " : "text-[#6b6880] hover:"}`}>
+                          {k}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="px-4 py-4">
+                <AreaChart data={chartData} />
+              </div>
+            </Card>
+
+            <Card className="flex flex-col">
+              <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#f0edf9]">
+                <h2 className="font-semibold text-sm text-[#241B3D]">Recent Chats</h2>
+                <button className="text-[11px] font-medium text-[#7C3AED] hover:underline flex items-center gap-1">
+                  <EyeIcon className="w-3 h-3" /> View All
+                </button>
+              </div>
+              <div className="flex-1 divide-y divide-[#D0BDF4]">
+                {recentChats.map(({ initials, name, message, time, color }) => (
+                  <div key={name} className="hover-row flex items-start gap-3 px-5 py-3.5 cursor-default">
+                    <div className={`w-8 h-8 rounded-full ${color} flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5`}>{initials}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-[#241B3D] truncate">{name}</p>
+                      <p className="text-[11px] text-[#6b6880] truncate mt-0.5">{message}</p>
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] text-[#6b6880] flex-shrink-0 mt-0.5">
+                      <ClockIcon className="w-2.5 h-2.5" />{time}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="flex flex-col">
+              <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-[#f0edf9]">
+                <h2 className="font-semibold text-sm text-[#241B3D]">FAQs by Category</h2>
+                <button className="text-[11px] font-medium text-[#7C3AED] hover:underline">This Week</button>
+              </div>
+              <div className="flex flex-col items-center flex-1 py-3 px-4">
+                <DonutChart data={faqCategories} />
+                <div className="w-full mt-1 space-y-1.5">
+                  {faqCategories.map(({ name, value, color }) => (
+                    <div key={name} className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{background:color}}></span>
+                        <span className="text-[#6b6880]">{name}</span>
+                      </div>
+                      <span className="font-semibold text-[#241B3D]">{value}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Bottom row */}
+          <div className="grid grid-cols-2 gap-5">
+            <Card>
+              <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-[#f0edf9]">
+                <h2 className="font-semibold text-sm text-[#241B3D]">Top Asked Questions</h2>
+                <button className="text-[11px] font-medium text-[#7C3AED] hover:underline flex items-center gap-1">
+                  <EyeIcon className="w-3 h-3" /> View All
+                </button>
+              </div>
+              <div className="px-6 py-3 space-y-1">
+                {topFAQs.map(({ question, count }, idx) => (
+                  <div key={question} className="hover-row-q flex items-center gap-3 px-3 py-3 rounded-xl cursor-default">
+                    <span className="w-6 h-6 rounded-lg  text-[#7C3AED] text-[10px] font-bold flex items-center justify-center flex-shrink-0">{idx+1}</span>
+                    <p className="flex-1 text-[13px] text-[#241B3D] font-medium truncate">{question}</p>
+                    <span className="flex items-center gap-1  text-[#7C3AED] text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0">
+                      <HashIcon className="w-2.5 h-2.5" />{count}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card>
+              <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-[#f0edf9]">
+                <h2 className="font-semibold text-sm text-[#241B3D]">System Overview</h2>
+                <div className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full pulse-dot"></span>All Systems Operational
+                </div>
+              </div>
+              <div className="p-6 grid grid-cols-2 gap-4">
+                {systemStatuses.map(({ label, Icon: I, status, iconBg, iconColor }) => (
+                  <div key={label} className="status-card border-2 border-[rgba(91,33,182,0.16)] rounded-xl p-4 flex items-center gap-3 cursor-default">
+                    <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center flex-shrink-0`}>
+                      <I className={`w-5 h-5 ${iconColor}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#241B3D]">{label}</p>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full mt-0.5">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>{status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          <footer className="border-t border-[rgba(91,33,182,0.16)] mt-8 pt-4 flex items-center justify-center">
+            <p className="text-xs text-[#6b6880]">© 2026 <span className="font-semibold text-[#241B3D]">ZeAI Soft</span>. All rights reserved.</p>
+          </footer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Dashboard />);
+</script>
+</body>
+</html>
