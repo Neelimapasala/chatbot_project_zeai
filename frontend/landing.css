@@ -1,0 +1,190 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+
+    height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:linear-gradient(135deg,#d0bdf4,#dccef8);
+
+    overflow:hidden;
+}
+
+/* Background Decorative Circles */
+
+body::before{
+    content:"";
+    position:absolute;
+    width:450px;
+    height:450px;
+    border-radius:50%;
+    background:rgba(255,255,255,.18);
+    top:-120px;
+    left:-120px;
+}
+
+body::after{
+    content:"";
+    position:absolute;
+    width:350px;
+    height:350px;
+    border-radius:50%;
+    background:rgba(255,255,255,.15);
+    bottom:-100px;
+    right:-100px;
+}
+
+.container{
+
+    width:100%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:1;
+}
+
+.card{
+
+    width:430px;
+
+    background:#ffffff;
+
+    padding:45px;
+
+    border-radius:25px;
+
+    text-align:center;
+
+    box-shadow:0 20px 45px rgba(0,0,0,.12);
+
+}
+
+.logo{
+
+    width:180px;
+
+    margin-bottom:20px;
+
+}
+
+.card h2{
+
+    color:#5a189a;
+
+    font-size:34px;
+
+    margin-bottom:18px;
+
+    font-weight:700;
+
+}
+
+.card p{
+
+    color:#666;
+
+    line-height:1.7;
+
+    margin-bottom:35px;
+
+    font-size:16px;
+
+}
+
+button{
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:17px;
+
+    font-weight:600;
+
+    transition:.3s;
+
+    margin-top:18px;
+
+}
+
+.user-btn{
+
+    background:#9d4edd;
+
+    color:white;
+
+}
+
+.user-btn:hover{
+
+    background:#7b2cbf;
+
+    transform:translateY(-3px);
+
+    box-shadow:0 8px 20px rgba(123,44,191,.3);
+
+}
+
+.admin-btn{
+
+    background:#c77dff;
+
+    color:white;
+
+}
+
+.admin-btn:hover{
+
+    background:#9d4edd;
+
+    transform:translateY(-3px);
+
+    box-shadow:0 8px 20px rgba(157,78,221,.3);
+
+}
+
+@media(max-width:500px){
+
+.card{
+
+    width:90%;
+
+    padding:35px 25px;
+
+}
+
+.logo{
+
+    width:150px;
+
+}
+
+.card h2{
+
+    font-size:28px;
+
+}
+
+button{
+
+    font-size:16px;
+
+}
+
+}

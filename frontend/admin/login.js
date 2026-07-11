@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear input values immediately
         emailInput.value = '';
         passwordInput.value = '';
+     window.location.href = "dashboard.html";
     });
 
     // 3. Navigation: Switch views between Login and Forgot panels
