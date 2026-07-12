@@ -6,10 +6,18 @@ from app.database import get_db
 from sqlalchemy import func
 from typing import List
 from app import models, schemas
+from fastapi.middleware.cors import CORSMiddleware
 from app.services.faq_matcher import find_faq_match
 from app.services.rag_placeholder import get_rag_response
 
 app = FastAPI(title="ZeAI Soft Chatbot API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
