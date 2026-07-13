@@ -74,6 +74,10 @@ def create_faq(
     db: Session = Depends(get_db),
     current_admin: models.Admin = Depends(get_current_admin),
 ):
+    category = db.query(models.Category).filter(models.Category.category_id == faq.category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
     new_faq = models.FAQ(
         category_id=faq.category_id,
         question=faq.question,
@@ -114,6 +118,10 @@ def get_my_profile(current_admin: models.Admin = Depends(get_current_admin)):
     }
 @app.post("/chat", response_model=schemas.ChatResponse)
 def chat(request: schemas.ChatRequest, db: Session = Depends(get_db)):
+    session = db.query(models.UserSession).filter(models.UserSession.session_id == request.session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
     matched_faq = find_faq_match(db, request.query)
 
     if matched_faq:
